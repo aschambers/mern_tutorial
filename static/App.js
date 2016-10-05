@@ -60,7 +60,7 @@ var BugTable = React.createClass({
 						React.createElement(
 							"th",
 							null,
-							"Title"
+							"Description"
 						)
 					)
 				),
@@ -80,9 +80,30 @@ var BugAdd = React.createClass({
 	render: function () {
 		return React.createElement(
 			"div",
-			{ className: "BugAdd" },
-			"I am meant to add bugs!"
+			null,
+			React.createElement(
+				"form",
+				{ name: "bugAdd" },
+				React.createElement("input", { type: "text", name: "owner", placeholder: "Owner" }),
+				React.createElement("br", null),
+				React.createElement("input", { type: "text", name: "decs", placeholder: "Description" }),
+				React.createElement(
+					"button",
+					{ onClick: this.handleSubmit },
+					"Add Bug"
+				)
+			)
 		);
+	},
+	handleSubmit: function (e) {
+		// prevent form from resubmitting upon button click
+		e.preventDefault();
+		// set form equal to form name
+		var form = document.forms.bugAdd;
+		// add properties entered to form
+		this.props.addBug({ owner: form.owner.value, decs: form.decs.value, status: 'New' });
+		// clear the form for next input
+		form.owner.value = "";form.decs.value = "";
 	}
 });
 
@@ -141,24 +162,18 @@ var BugList = React.createClass({
 				"List of all bugs here:"
 			),
 			React.createElement(BugFilter, null),
-			React.createElement(BugTable, { bugs: this.state.bugs }),
-			React.createElement(
-				"button",
-				{ onClick: this.addBug },
-				"Add Bug"
-			),
 			React.createElement("hr", null),
-			React.createElement(BugAdd, null)
+			React.createElement(BugTable, { bugs: this.state.bugs }),
+			React.createElement("hr", null),
+			React.createElement(BugAdd, { addBug: this.addBug })
 		);
 	},
-	addBug: function () {
-		var nextId = this.state.bugs.length + 1;
-		this.newBug({ id: nextId, priority: 4, status: 'New', owner: 'Milan', decs: 'Console warning' });
-	},
-	newBug: function (bug) {
+	addBug: function (bug) {
 		console.log("Adding bug:", bug);
 		// making a copy of state
 		var bugsCopy = this.state.bugs.slice();
+		bug.id = this.state.bugs.length + 1;
+		bug.priority = this.state.bugs.length + 1;
 		bugsCopy.push(bug);
 		this.setState({ bugs: bugsCopy });
 	}

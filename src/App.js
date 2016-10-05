@@ -30,7 +30,7 @@ var BugTable = React.createClass({
 							<th>Priority</th>
 							<th>Status</th>
 							<th>Owner</th>
-							<th>Title</th>
+							<th>Description</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -45,10 +45,25 @@ var BugTable = React.createClass({
 var BugAdd = React.createClass({
 	render: function() {
 		return (
-			<div className="BugAdd">
-				I am meant to add bugs!
+			<div>
+				<form name="bugAdd">
+					<input type="text" name="owner" placeholder="Owner" /><br />
+					<input type="text" name="decs" placeholder="Description" />
+					{/* call handleSubmit function upon button click */}
+					<button onClick={this.handleSubmit}>Add Bug</button>
+				</form>
 			</div>
 		);
+	},
+	handleSubmit: function(e) {
+		// prevent form from resubmitting upon button click
+		e.preventDefault();
+		// set form equal to form name
+		var form = document.forms.bugAdd;
+		// add properties entered to form
+		this.props.addBug({owner: form.owner.value, decs: form.decs.value, status: 'New'});
+		// clear the form for next input
+		form.owner.value = ""; form.decs.value = "";
 	}
 });
 
@@ -78,21 +93,19 @@ var BugList = React.createClass({
 			<div className="BugList">
 				<h1>List of all bugs here:</h1>
 				<BugFilter />
-				<BugTable bugs={this.state.bugs} />
-				<button onClick={this.addBug}>Add Bug</button>
 				<hr />
-				<BugAdd />
+				<BugTable bugs={this.state.bugs} />
+				<hr />
+				<BugAdd addBug={this.addBug} />
 			</div>
 		)
 	},
-	addBug: function() {
-		var nextId = this.state.bugs.length + 1;
-		this.newBug({id: nextId, priority: 4, status: 'New', owner: 'Milan', decs: 'Console warning'});
-	},
-	newBug: function(bug) {
+	addBug: function(bug) {
 		console.log("Adding bug:", bug);
 		// making a copy of state
 		var bugsCopy = this.state.bugs.slice();
+		bug.id = this.state.bugs.length + 1;
+		bug.priority = this.state.bugs.length +1;
 		bugsCopy.push(bug);
 		this.setState({bugs: bugsCopy});
 	}
