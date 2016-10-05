@@ -15,7 +15,7 @@ var BugTable = React.createClass({
 
 	render: function () {
 		var bugRows = this.props.bugs.map(function (bug) {
-			return React.createElement(BugRow, { key: bug.id, bug: bug });
+			return React.createElement(BugRow, { key: bug._id, bug: bug });
 		});
 		return React.createElement(
 			"div",
@@ -114,7 +114,7 @@ var BugRow = React.createClass({
 			React.createElement(
 				"td",
 				null,
-				this.props.bug.id
+				this.props.bug._id
 			),
 			React.createElement(
 				"td",
