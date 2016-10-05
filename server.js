@@ -1,8 +1,11 @@
 var express = require('express');
 // in order to parse JSON in the request body (req.body)
 var bodyParser = require('body-parser');
+// use mongodb
+var MongoServer = require('mongodb').MongoClient;
 
 var app = express();
+var db;
 
 app.use(express.static('static'));
 
@@ -18,6 +21,9 @@ app.get('/api/bugs', function(req, res) {
 	// stringifies and returns an array of bugs
 	// res.status(200).send(JSON.stringify(data));
 	res.json(data);
+	db.collection("bugs").find().toArray(function(err, docs) {
+		res.json(docs);
+	});
 });
 
 app.use(bodyParser.json());
@@ -30,7 +36,10 @@ app.post('/api/bugs', function(req, res) {
 	res.json(newBug);
 });
 
-var server = app.listen(3000, function() {
-	var port = server.address().port;
-	console.log("Started server at port", port);
+MongoServer.connect('mongodb://localhost/bugsdb', function(err, dbConnection) {
+  	db = dbConnection;
+  	var server = app.listen(3000, function() {
+		var port = server.address().port;
+		console.log("Started server at port", port);
+	});
 });
