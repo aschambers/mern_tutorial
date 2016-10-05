@@ -1,9 +1,3 @@
-var data = [
-  {id: 1, priority: 1, status: "Open", owner: "Alex", decs: "App crashes when opening"},
-  {id: 2, priority: 2, status: "New", owner: "Brian", decs: "Pages have a weird border"},
-  {id: 3, priority: 3, status: "New", owner: "Ryan", decs: "Can't login to my e-mail"}
-];
-
 var BugFilter = React.createClass({
 	render: function() {
 		return (
@@ -16,7 +10,6 @@ var BugFilter = React.createClass({
 
 var BugTable = React.createClass({
 	render: function() {
-		bugs={data}
 		var bugRows = this.props.bugs.map(function(bug) {
 			return <BugRow key={bug.id} bug={bug} />
 		});
@@ -61,7 +54,7 @@ var BugAdd = React.createClass({
 		// set form equal to form name
 		var form = document.forms.bugAdd;
 		// add properties entered to form
-		this.props.addBug({owner: form.owner.value, decs: form.decs.value, status: 'New'});
+		this.props.addBug({owner: form.owner.value, decs: form.decs.value, status: 'New', priority: 1});
 		// clear the form for next input
 		form.owner.value = ""; form.decs.value = "";
 	}
@@ -84,7 +77,7 @@ var BugRow = React.createClass({
 var BugList = React.createClass({
 	getInitialState: function() {
 		return {
-			bugs: data
+			bugs: []
 		};
 	},
 	render: function() {
@@ -100,14 +93,35 @@ var BugList = React.createClass({
 			</div>
 		)
 	},
+	componentDidMount: function() {
+		$.ajax('/api/bugs').done(function(data) {
+			this.setState({bugs: data});
+		}.bind(this));
+	},
 	addBug: function(bug) {
 		console.log("Adding bug:", bug);
-		// making a copy of state
-		var bugsCopy = this.state.bugs.slice();
-		bug.id = this.state.bugs.length + 1;
-		bug.priority = this.state.bugs.length +1;
-		bugsCopy.push(bug);
-		this.setState({bugs: bugsCopy});
+		// // making a copy of state
+		// var bugsCopy = this.state.bugs.slice();
+		// bug.id = this.state.bugs.length + 1;
+		// // bug.priority = this.state.bugs.length +1;
+		// bugsCopy.push(bug);
+		// this.setState({bugs: bugsCopy});
+		// use ajax to post a new bug
+		$.ajax({
+			// make AJAX POST to url /api/bugs of type JSON
+			type: 'POST', url: '/api/bugs', contentType: 'application/json',
+			data: JSON.stringify(bug),
+			// if success make copy of bug in state
+			success: function(data) {
+				var bug = data;
+				var bugsCopy = this.state.bugs.concat(bug);
+				this.setState({bugs: bugsCopy});
+			}.bind(this),
+			// otherwise show error to user
+			error: function(xhr, status, err) {
+				console.log("Error adding bug:", err);
+			}
+		});
 	}
 });
 
