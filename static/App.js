@@ -1,3 +1,5 @@
+var data = [{ id: 1, priority: 1, status: "Open", owner: "Alex", decs: "App crashes when opening" }, { id: 2, priority: 2, status: "New", owner: "Brian", decs: "Pages have a weird border" }, { id: 3, priority: 3, status: "New", owner: "Ryan", decs: "Can't login to my e-mail" }];
+
 var BugFilter = React.createClass({
 	displayName: "BugFilter",
 
@@ -14,6 +16,10 @@ var BugTable = React.createClass({
 	displayName: "BugTable",
 
 	render: function () {
+		bugs = { data };
+		var bugRows = this.props.bugs.map(function (bug) {
+			return React.createElement(BugRow, { key: bug.id, bug: bug });
+		});
 		return React.createElement(
 			"div",
 			{ className: "BugTable" },
@@ -61,8 +67,7 @@ var BugTable = React.createClass({
 				React.createElement(
 					"tbody",
 					null,
-					React.createElement(BugRow, { id: 1, priority: "1", status: "Open", owner: "Alex", decs: "App crashes when opening" }),
-					React.createElement(BugRow, { id: 2, priority: "2", status: "New", owner: "Brian", decs: "Pages have weird border" })
+					bugRows
 				)
 			)
 		);
@@ -91,27 +96,27 @@ var BugRow = React.createClass({
 			React.createElement(
 				"td",
 				null,
-				this.props.id
+				this.props.bug.id
 			),
 			React.createElement(
 				"td",
 				null,
-				this.props.priority
+				this.props.bug.priority
 			),
 			React.createElement(
 				"td",
 				null,
-				this.props.status
+				this.props.bug.status
 			),
 			React.createElement(
 				"td",
 				null,
-				this.props.owner
+				this.props.bug.owner
 			),
 			React.createElement(
 				"td",
 				null,
-				this.props.decs
+				this.props.bug.decs
 			)
 		);
 	}
@@ -120,7 +125,13 @@ var BugRow = React.createClass({
 var BugList = React.createClass({
 	displayName: "BugList",
 
+	getInitialState: function () {
+		return {
+			bugs: data
+		};
+	},
 	render: function () {
+		console.log("Rendering bug list, num items:", this.state.bugs.length);
 		return React.createElement(
 			"div",
 			{ className: "BugList" },
@@ -130,10 +141,26 @@ var BugList = React.createClass({
 				"List of all bugs here:"
 			),
 			React.createElement(BugFilter, null),
-			React.createElement(BugTable, null),
+			React.createElement(BugTable, { bugs: this.state.bugs }),
+			React.createElement(
+				"button",
+				{ onClick: this.addBug },
+				"Add Bug"
+			),
 			React.createElement("hr", null),
 			React.createElement(BugAdd, null)
 		);
+	},
+	addBug: function () {
+		var nextId = this.state.bugs.length + 1;
+		this.newBug({ id: nextId, priority: 4, status: 'New', owner: 'Milan', decs: 'Console warning' });
+	},
+	newBug: function (bug) {
+		console.log("Adding bug:", bug);
+		// making a copy of state
+		var bugsCopy = this.state.bugs.slice();
+		bugsCopy.push(bug);
+		this.setState({ bugs: bugsCopy });
 	}
 });
 
