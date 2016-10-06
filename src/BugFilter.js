@@ -1,54 +1,81 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
+var injectTapEventPlugin = require('react-tap-event-plugin');
+
+var RaisedButton = require('material-ui/lib/raised-button');
+var Card = require('material-ui/lib/card/card');
+var CardHeader = require('material-ui/lib/card/card-header');
+var CardText = require('material-ui/lib/card/card-text');
+var SelectField = require('material-ui/lib/select-field');
+var MenuItem = require('material-ui/lib/menus/menu-item');
+var Avatar = require('material-ui/lib/avatar');
+var FontIcon = require('material-ui/lib/font-icon');
+var Colors = require('material-ui/lib/styles').Colors;
+
+injectTapEventPlugin();
+
+var anyValue = '*';
 
 var BugFilter = React.createClass({
 	render: function() {
 		console.log("Rendering BugFilter, state=", this.state);
 		return (
-			<div>
-				<h3>Filter</h3>
-				Status:
-				<select value={this.state.status} onChange={this.onChangeStatus}>
-					<option value="">(Any)</option>
-					<option value="New">New</option>
-					<option value="Open">Open</option>
-					<option value="Closed">Closed</option>
-				</select>
-				<br />
-				Priority:
-				<select value={this.state.priority} onChange={this.onChangePriority}>
-					<option value="">(Any)</option>
-					<option value="1">1</option>
-					<option value="2">2</option>
-					<option value="3">3</option>
-				</select>
-				<br />
-				<button onClick={this.submit}>Apply</button>
-			</div>
+			<Card initiallyExpanded={true}>
+        		<CardHeader title="Filter" subtitle="Show a subset of records"
+          			actAsExpander={true} showExpandableButton={true}
+          			avatar={
+            			<Avatar backgroundColor={Colors.teal500} icon={
+              				<FontIcon className="fa fa-filter"></FontIcon>
+            			}>
+            		</Avatar>
+          			}/
+          		>
+        		<CardText expandable={true} style={{paddingTop: 0}}>
+          			<SelectField value={this.state.status} onChange={this.onChangeStatus} floatingLabelText="Status">
+            			<MenuItem value={anyValue} primaryText="(Any)" />
+            			<MenuItem value="New" primaryText="New" />
+            			<MenuItem value="Open" primaryText="Open" />
+            			<MenuItem value="Closed" primaryText="Closed" />
+          			</SelectField>
+          			&nbsp;
+          			<SelectField value={this.state.priority} onChange={this.onChangePriority} floatingLabelText="Priority">
+            			<MenuItem value={anyValue} primaryText="(Any)" />
+            			<MenuItem value="1" primaryText="1" />
+            			<MenuItem value="2" primaryText="2" />
+            			<MenuItem value="3" primaryText="3" />
+          			</SelectField>
+          			<br />
+          			<RaisedButton label="Apply" primary={true} onTouchTap={this.submit} />
+        		</CardText>
+      		</Card>
 		);
 	},
 	getInitialState: function() {
 		var initFilter = this.props.initFilter;
-		return {status: initFilter.status, priority: initFilter.priority};	
+		return {status: initFilter.status || anyValue, priority: initFilter.priority || anyValue};	
 	},
 	componentWillReceiveProps: function(newProps) {
-		if (newProps.initFilter.status === this.state.status && newProps.initFilter === this.state.priority) {
+		var newFilter = {
+      		status: newProps.initFilter.status || anyValue,
+      		priority: newProps.initFilter.priority || anyValue
+    	};
+    	if (newFilter.status === this.state.status && newFilter.priority === this.state.priority) {
 			console.log("BugFilter: componentWillReceiveProps, no change");
 			return;
 		}
-		console.log("BugFilter: componentWillReceiveProps, new filter:", newProps.initFilter);
-		this.setState({status: newProps.initFilter.status, priority: newProps.initFilter.priority});
+		console.log("BugFilter: componentWillReceiveProps, new filter:", newFilter);
+    	this.setState({status: newFilter.status, priority: newFilter.priority});
 	},
-	onChangeStatus: function(e) {
-		this.setState({status: e.target.value})
+	onChangeStatus: function(e, index, value) {
+		this.setState({status: value})
 	},
-	onChangePriority: function(e) {
-		this.setState({priority: e.target.value})
+	onChangePriority: function(e, index, value) {
+		this.setState({priority: value})
 	},
 	submit: function(e) {
 		var newFilter = {};
-		if (this.state.priority) newFilter.priority = this.state.priority;
-		if (this.state.status) newFilter.status = this.state.status;
+		if (this.state.priority != anyValue) newFilter.priority = this.state.priority;
+		if (this.state.status != anyValue) newFilter.status = this.state.status;
 		this.props.submitHandler(newFilter);
 	}
 });
