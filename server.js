@@ -20,6 +20,12 @@ app.use(express.static('static'));
 app.get('/api/bugs', function(req, res) {
 	// stringifies and returns an array of bugs
 	// res.status(200).send(JSON.stringify(data));
+	console.log("Query string", req.query);
+	var filter = {};
+	if (req.query.priority)
+		filter.priority = req.query.priority;
+	if (req.query.status)
+		filter.status = req.query.status;
 	db.collection("bugs").find().toArray(function(err, docs) {
 		res.json(docs);
 	});
