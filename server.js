@@ -3,6 +3,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 // use mongodb
 var MongoClient = require('mongodb').MongoClient;
+// set objectId
+var ObjectId = require('mongodb').ObjectID;
 
 var app = express();
 var db;
@@ -16,7 +18,7 @@ app.use(express.static('static'));
 //   {id: 3, priority: 3, status: "New", owner: "Ryan", decs: "Can't login to my e-mail"}
 // ];
 
-// got to localhost:3000/api/bugs to see our bugs (data in the array)
+// got to localhost:3000/api/bugs to see our bugs (data in the array), get a list of filtered records
 app.get('/api/bugs', function(req, res) {
 	// stringifies and returns an array of bugs
 	// res.status(200).send(JSON.stringify(data));
@@ -32,7 +34,7 @@ app.get('/api/bugs', function(req, res) {
 });
 
 app.use(bodyParser.json());
-
+/* Insert a record */
 app.post('/api/bugs', function(req, res) {
 	console.log("Req body:", req.body);
 	var newBug = req.body;
@@ -41,6 +43,13 @@ app.post('/api/bugs', function(req, res) {
 		db.collection("bugs").find({_id: newId}).next(function(err, doc) {
 			res.json(doc);
 		});
+	});
+});
+
+/* Get a single record */
+app.get('/api/bugs/:id', function(req, res) {
+	db.collection("bugs").findOne({_id: ObjectId(req.params.id)}, function(err, bug) {
+		res.json(bug);
 	});
 });
 
